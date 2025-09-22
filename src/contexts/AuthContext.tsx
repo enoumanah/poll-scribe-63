@@ -52,9 +52,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
+      console.log('AuthContext: Starting login...');
       const response = await authAPI.login({ username, password });
+      console.log('AuthContext: Login response:', response);
       setUser(response.user);
+      console.log('AuthContext: User set:', response.user);
     } catch (error) {
+      console.error('AuthContext: Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -64,9 +68,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (username: string, email: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
+      console.log('AuthContext: Starting registration...');
       const response = await authAPI.register({ username, email, password });
+      console.log('AuthContext: Registration response:', response);
       setUser(response.user);
+      console.log('AuthContext: User set:', response.user);
     } catch (error) {
+      console.error('AuthContext: Registration error:', error);
       throw error;
     } finally {
       setIsLoading(false);

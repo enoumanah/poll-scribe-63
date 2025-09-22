@@ -72,22 +72,28 @@ async function apiRequest<T>(
 // Authentication API
 export const authAPI = {
   async login(credentials: AuthData): Promise<{ token: string; user: any }> {
+    console.log('API: Starting login request with credentials:', { username: credentials.username });
     const response = await apiRequest<{ token: string; user: any }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
     
+    console.log('API: Login response received:', response);
     tokenManager.setToken(response.token);
+    console.log('API: Token stored:', response.token);
     return response;
   },
 
   async register(userData: AuthData): Promise<{ token: string; user: any }> {
+    console.log('API: Starting register request with data:', { username: userData.username, email: userData.email });
     const response = await apiRequest<{ token: string; user: any }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
     
+    console.log('API: Register response received:', response);
     tokenManager.setToken(response.token);
+    console.log('API: Token stored:', response.token);
     return response;
   },
 

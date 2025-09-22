@@ -45,14 +45,20 @@ const Login: React.FC = () => {
     setIsLoading(true);
     
     try {
+      console.log('Starting authentication...', { isLogin, from });
       if (isLogin) {
+        console.log('Attempting login...');
         await login(formData.username, formData.password);
+        console.log('Login successful, navigating to:', from);
         toast.success('Welcome back!');
       } else {
+        console.log('Attempting registration...');  
         await register(formData.username, formData.email, formData.password);
+        console.log('Registration successful, navigating to:', from);
         toast.success('Account created successfully!');
       }
       
+      console.log('About to navigate to:', from);
       navigate(from, { replace: true });
     } catch (error: any) {
       console.error('Auth error:', error);

@@ -55,8 +55,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('AuthContext: Starting login...');
       const response = await authAPI.login({ username, password });
       console.log('AuthContext: Login response:', response);
-      setUser(response.user);
-      console.log('AuthContext: User set:', response.user);
+      // Set user from response or create fallback user object
+      const user = response.user || { id: 'me', username, email: '' };
+      setUser(user);
+      console.log('AuthContext: User set:', user);
     } catch (error) {
       console.error('AuthContext: Login error:', error);
       throw error;
@@ -71,8 +73,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('AuthContext: Starting registration...');
       const response = await authAPI.register({ username, email, password });
       console.log('AuthContext: Registration response:', response);
-      setUser(response.user);
-      console.log('AuthContext: User set:', response.user);
+      // Set user from response or create fallback user object
+      const user = response.user || { id: 'me', username, email };
+      setUser(user);
+      console.log('AuthContext: User set:', user);
     } catch (error) {
       console.error('AuthContext: Registration error:', error);
       throw error;
@@ -88,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user || tokenManager.isAuthenticated(),
     isLoading,
     login,
     register,

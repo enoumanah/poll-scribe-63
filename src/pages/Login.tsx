@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,12 +22,20 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login, register } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // Navigate when authentication state changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('User authenticated, navigating to:', from);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +66,7 @@ const Login: React.FC = () => {
         toast.success('Account created successfully!');
       }
       
-      console.log('About to navigate to:', from);
-      navigate(from, { replace: true });
+      console.log('Authentication successful, waiting for state update...');
     } catch (error: any) {
       console.error('Auth error:', error);
       const errorMessage = error.message || 'Authentication failed';

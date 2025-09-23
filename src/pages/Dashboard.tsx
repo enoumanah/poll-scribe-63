@@ -22,6 +22,7 @@ interface Poll {
   shareLink?: string;
   createdAt: string;
   totalVotes: number;
+  ownerUsername: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -36,7 +37,7 @@ const Dashboard: React.FC = () => {
   const fetchPolls = async () => {
     try {
       setIsLoading(true);
-      const data = await pollsAPI.getPolls();
+      const data = await pollsAPI.getDashboardPolls();
       setPolls(data);
     } catch (error: any) {
       console.error('Failed to fetch polls:', error);
@@ -140,9 +141,9 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">My Polls</h1>
+            <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
             <p className="text-muted-foreground">
-              Manage and track your poll performance
+              Explore public polls and manage your private polls
             </p>
           </div>
           
@@ -164,9 +165,9 @@ const Dashboard: React.FC = () => {
               <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
                 <PlusIcon className="w-10 h-10 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-4">No polls yet</h3>
+              <h3 className="text-xl font-semibold mb-4">No polls to show yet</h3>
               <p className="text-muted-foreground mb-6">
-                Create your first poll to start collecting feedback and opinions from your audience.
+                No polls to show yet. Create one!
               </p>
               <Link to="/create" className="btn-primary inline-flex items-center space-x-2">
                 <PlusIcon className="w-4 h-4" />
@@ -210,6 +211,25 @@ const Dashboard: React.FC = () => {
                         )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Poll Options */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Options:</h4>
+                    <div className="space-y-1">
+                      {poll.options.map((option, index) => (
+                        <div key={option.id} className="text-sm p-2 bg-secondary/20 rounded-md">
+                          {option.text}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Creator Info */}
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground">
+                      Created by: <span className="font-medium text-foreground">{poll.ownerUsername}</span>
+                    </p>
                   </div>
 
                   {/* Poll Stats */}

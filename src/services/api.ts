@@ -138,6 +138,14 @@ export const pollsAPI = {
 
   async getResults(id: string): Promise<any> {
     return apiRequest<any>(`/polls/${id}/results`);
+  },
+
+  async getDashboardPolls(): Promise<any[]> {
+    return apiRequest<any[]>('/polls/dashboard');
+  },
+
+  async getUserActivityPolls(): Promise<any[]> {
+    return apiRequest<any[]>('/polls/user-activity');
   }
 };
 

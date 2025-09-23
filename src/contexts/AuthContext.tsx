@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authAPI, tokenManager } from '@/services/api';
+import { jwtDecode } from 'jwt-decode';
 
 interface User {
   id: string;
@@ -35,17 +36,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already authenticated on app start
     const initializeAuth = async () => {
       const token = tokenManager.getToken();
       if (token) {
-        // In a real app, you might want to validate the token with the server
-        // For now, we'll assume the token is valid if it exists
-        setUser({ id: '1', username: 'user', email: 'user@example.com' });
+        try {
+          // Decode the token to get the real user's username
+          const decodedToken: { sub: string } = jwtDecode(token);
+          const username = decodedToken.sub;
+  
+          // Set the user state with the correct username
+          setUser({ id: 'me', username: username, email: '' }); 
+        } catch (error) {
+          console.error("Invalid token:", error);
+          tokenManager.removeToken(); // Clear the invalid token
+          setUser(null);
+        }
       }
       setIsLoading(false);
     };
-
+  
     initializeAuth();
   }, []);
 

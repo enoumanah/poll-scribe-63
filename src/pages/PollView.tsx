@@ -106,7 +106,7 @@ const PollView: React.FC = () => {
     setIsVoting(true);
     
     try {
-      await pollsAPI.vote(poll.id, { optionId: parseInt(optionId) });
+      await pollsAPI.vote(poll.id, { optionId: optionId });
       
       // Fetch updated results
       await fetchResults();

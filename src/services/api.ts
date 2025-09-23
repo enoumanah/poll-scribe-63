@@ -13,7 +13,7 @@ interface PollData {
 }
 
 interface VoteData {
-  optionId: number;
+  optionId: string;
 }
 
 // Authentication token management

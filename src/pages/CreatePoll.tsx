@@ -61,7 +61,8 @@ const CreatePoll: React.FC = () => {
         });
       }
       
-      navigate('/dashboard');
+      // Redirect to the vote page of the newly created poll
+      navigate(`/polls/${result.id}`);
     } catch (error: any) {
       console.error('Failed to create poll:', error);
       

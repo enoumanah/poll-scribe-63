@@ -38,6 +38,7 @@ const Dashboard: React.FC = () => {
     try {
       setIsLoading(true);
       const data = await pollsAPI.getDashboardPolls();
+      console.log('Dashboard polls data:', data); // Debug log
       setPolls(data);
     } catch (error: any) {
       console.error('Failed to fetch polls:', error);
@@ -183,7 +184,11 @@ const Dashboard: React.FC = () => {
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
           >
             <AnimatePresence>
-              {polls.map((poll) => (
+              {polls.map((poll) => {
+                // Debug each poll's visibility
+                console.log(`Poll "${poll.question}" visibility:`, poll.visibility);
+                
+                return (
                 <motion.div
                   key={poll.id}
                   variants={itemVariants}
@@ -291,8 +296,9 @@ const Dashboard: React.FC = () => {
                       )}
                     </motion.button>
                   </div>
-                </motion.div>
-              ))}
+                 </motion.div>
+                );
+              })}
             </AnimatePresence>
           </motion.div>
         )}

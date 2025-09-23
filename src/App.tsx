@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import CreatePoll from "./pages/CreatePoll";
 import PollView from "./pages/PollView";
+import MyActivity from "./pages/MyActivity";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +64,11 @@ const App = () => (
               <Route path="/polls/:id" element={
                 <ProtectedRoute>
                   <PollView />
+                </ProtectedRoute>
+              } />
+              <Route path="/my-activity" element={
+                <ProtectedRoute>
+                  <MyActivity />
                 </ProtectedRoute>
               } />
               

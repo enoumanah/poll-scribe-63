@@ -10,7 +10,8 @@ import {
   UserIcon,
   SunIcon,
   MoonIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 const Navigation: React.FC = () => {
@@ -31,6 +32,7 @@ const Navigation: React.FC = () => {
   const navItems = [
     { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
     { path: '/create', icon: PlusIcon, label: 'Create Poll' },
+    { path: '/my-activity', icon: ClockIcon, label: 'My Activity' },
   ];
 
   return (

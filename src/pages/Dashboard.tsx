@@ -1,288 +1,310 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { pollsAPI } from '@/services/api';
+import Navigation from '@/components/ui/Navigation';
 import {
-  ChartBarIcon,
+  PlusIcon,
   EyeIcon,
-  EyeSlashIcon,
-  SunIcon,
-  MoonIcon
+  ShareIcon,
+  TrashIcon,
+  ClipboardDocumentIcon,
+  GlobeAltIcon,
+  LockClosedIcon
 } from '@heroicons/react/24/outline';
 
-const Login: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const { login, register, isAuthenticated } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  const from = location.state?.from?.pathname || '/dashboard';
+interface Poll {
+  id: string;
+  question: string;
+  options: Array<{ id: string; text: string; voteCount: number }>;
+  visibility: 'public' | 'private';
+  shareLink?: string;
+  createdAt: string;
+  totalVotes: number;
+  ownerUsername: string;
+}
 
-  // Navigate when authentication state changes
+const Dashboard: React.FC = () => {
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deletingPollId, setDeletingPollId] = useState<string | null>(null);
+
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User authenticated, navigating to:', from);
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, from]);
+    fetchPolls();
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.username || !formData.password) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    
-    if (!isLogin && !formData.email) {
-      toast.error('Email is required for registration');
-      return;
-    }
-
-    setIsLoading(true);
-    
+  const fetchPolls = async () => {
     try {
-      console.log('Starting authentication...', { isLogin, from });
-      if (isLogin) {
-        console.log('Attempting login...');
-        await login(formData.username, formData.password);
-        console.log('Login successful, navigating to:', from);
-        toast.success('Welcome back!');
-      } else {
-        console.log('Attempting registration...');  
-        await register(formData.username, formData.email, formData.password);
-        console.log('Registration successful, navigating to:', from);
-        toast.success('Account created successfully!');
-      }
-      
-      console.log('Authentication successful, waiting for state update...');
+      setIsLoading(true);
+      const data = await pollsAPI.getDashboardPolls();
+      console.log('Dashboard polls data:', data); // Debug log
+      setPolls(data);
     } catch (error: any) {
-      console.error('Auth error:', error);
-      const errorMessage = error.message || 'Authentication failed';
-      
-      if (errorMessage.includes('401') || errorMessage.includes('Invalid credentials')) {
-        toast.error('Invalid username or password');
-      } else if (errorMessage.includes('400')) {
-        toast.error('Please check your input and try again');
-      } else {
-        toast.error(errorMessage);
-      }
+      console.error('Failed to fetch polls:', error);
+      toast.error('Failed to load polls');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+  const handleDeletePoll = async (pollId: string, pollQuestion: string) => {
+    if (!confirm(`Are you sure you want to delete "${pollQuestion}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setDeletingPollId(pollId);
+      await pollsAPI.deletePoll(pollId);
+      setPolls(polls.filter(poll => poll.id !== pollId));
+      toast.success('Poll deleted successfully');
+    } catch (error: any) {
+      console.error('Failed to delete poll:', error);
+      toast.error('Failed to delete poll');
+    } finally {
+      setDeletingPollId(null);
+    }
+  };
+
+  const handleSharePoll = async (poll: Poll) => {
+    const shareUrl = poll.visibility === 'private' && poll.shareLink
+      ? `${window.location.origin}/share/${poll.shareLink}`
+      : `${window.location.origin}/polls/${poll.id}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Poll link copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      toast.error('Failed to copy link');
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      {/* Theme Toggle */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={toggleTheme}
-        className="fixed top-4 right-4 p-2 rounded-md hover:bg-accent transition-colors z-10"
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? (
-          <SunIcon className="w-5 h-5" />
-        ) : (
-          <MoonIcon className="w-5 h-5" />
-        )}
-      </motion.button>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.3 },
+    },
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center"
+            >
+              <div className="spinner w-8 h-8 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading your polls...</p>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="container mx-auto px-4 py-8"
       >
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <ChartBarIcon className="w-10 h-10 text-primary" />
-            <span className="text-2xl font-bold gradient-text">PollCreator</span>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Explore public polls and manage your private polls
+            </p>
+          </div>
+          
+          <Link to="/create" className="btn-primary mt-4 sm:mt-0 inline-flex items-center space-x-2">
+            <PlusIcon className="w-4 h-4" />
+            <span>Create New Poll</span>
           </Link>
         </div>
 
-        {/* Auth Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}  
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="card-elevated p-8"
-        >
-          {/* Toggle Buttons */}
-          <div className="flex mb-8 bg-secondary rounded-lg p-1">
-            <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                isLogin
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
-                !isLogin
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Register
-            </button>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium mb-2">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                value={formData.username}
-                onChange={handleInputChange}
-                className="input-field"
-                placeholder="Enter your username"
-              />
-            </div>
-
-            {!isLogin && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required={!isLogin}
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="input-field"
-                  placeholder="your@email.com"
-                />
-              </motion.div>
-            )}
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="input-field pr-12"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-                  ) : (
-                    <EyeIcon className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed relative"
-            >
-              {isLoading && (
-                <div className="spinner w-4 h-4 absolute left-4"></div>
-              )}
-              <span className={isLoading ? 'ml-6' : ''}>
-                {isLoading 
-                  ? (isLogin ? 'Signing in...' : 'Creating account...') 
-                  : (isLogin ? 'Sign In' : 'Create Account')
-                }
-              </span>
-            </motion.button>
-          </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            {isLogin ? (
-              <p>
-                Need an account?{' '}
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className="text-primary hover:underline font-medium"
-                >
-                  Register here
-                </button>
-              </p>
-            ) : (
-              <p>
-                Already have an account?{' '}
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className="text-primary hover:underline font-medium"
-                >
-                  Login here
-                </button>
-              </p>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Back to Home */}
-        <div className="text-center mt-6">
-          <Link
-            to="/"
-            className="text-muted-foreground hover:text-primary transition-colors text-sm"
+        {/* Polls Grid */}
+        {polls.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-center py-20"
           >
-            ← Back to Home
-          </Link>
-        </div>
+            <div className="card-elevated p-12 max-w-md mx-auto">
+              <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+                <PlusIcon className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">No polls to show yet</h3>
+              <p className="text-muted-foreground mb-6">
+                No polls to show yet. Create one!
+              </p>
+              <Link to="/create" className="btn-primary inline-flex items-center space-x-2">
+                <PlusIcon className="w-4 h-4" />
+                <span>Create Your First Poll</span>
+              </Link>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
+            <AnimatePresence>
+              {polls.map((poll) => {
+                // Debug each poll's visibility
+                console.log(`Poll "${poll.question}" visibility:`, poll.visibility);
+                
+                return (
+                <motion.div
+                  key={poll.id}
+                  variants={itemVariants}
+                  layout
+                  whileHover={{ y: -5 }}
+                  className="card-elevated p-6 group"
+                >
+                  {/* Poll Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-2 line-clamp-2">
+                        {poll.question}
+                      </h3>
+                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                        {poll.visibility === 'public' ? (
+                          <div className="flex items-center space-x-1">
+                            <GlobeAltIcon className="w-4 h-4" />
+                            <span className="badge-success">Public</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-1">
+                            <LockClosedIcon className="w-4 h-4" />
+                            <span className="badge-private">Private</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Poll Options */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-muted-foreground mb-2">Options:</h4>
+                    <div className="space-y-1">
+                      {poll.options.map((option, index) => (
+                        <div key={option.id} className="text-sm p-2 bg-secondary/20 rounded-md">
+                          {option.text}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Creator Info */}
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground">
+                      Created by: <span className="font-medium text-foreground">{poll.ownerUsername}</span>
+                    </p>
+                  </div>
+
+                  {/* Poll Stats */}
+                  <div className="mb-6">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {poll.totalVotes} {poll.totalVotes === 1 ? 'vote' : 'votes'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Created {formatDate(poll.createdAt)}
+                    </p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-4 border-t border-border">
+                    <div className="flex space-x-2">
+                      <Link
+                        to={`/polls/${poll.id}`}
+                        className="p-2 rounded-md hover:bg-accent transition-colors group"
+                        title="View Poll"
+                      >
+                        <EyeIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                      </Link>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleSharePoll(poll)}
+                        className="p-2 rounded-md hover:bg-accent transition-colors group"
+                        title="Share Poll"
+                      >
+                        <ShareIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                      </motion.button>
+
+                      {poll.visibility === 'private' && poll.shareLink && (
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleSharePoll(poll)}
+                          className="p-2 rounded-md hover:bg-accent transition-colors group"
+                          title="Copy Share Link"
+                        >
+                          <ClipboardDocumentIcon className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                        </motion.button>
+                      )}
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleDeletePoll(poll.id, poll.question)}
+                      disabled={deletingPollId === poll.id}
+                      className="p-2 rounded-md hover:bg-destructive hover:text-destructive-foreground transition-colors disabled:opacity-50"
+                      title="Delete Poll"
+                    >
+                      {deletingPollId === poll.id ? (
+                        <div className="spinner w-4 h-4"></div>
+                      ) : (
+                        <TrashIcon className="w-4 h-4" />
+                      )}
+                    </motion.button>
+                  </div>
+                 </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );
 };
 
-export default Login;
+export default Dashboard;

@@ -1,158 +1,288 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { pollsAPI } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, PlusCircle, BarChart2 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { toast } from 'react-toastify';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  ChartBarIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  SunIcon,
+  MoonIcon
+} from '@heroicons/react/24/outline';
 
-interface Option {
-  id: string;
-  text: string;
-  votes: number;
-}
-
-interface Poll {
-  id: string;
-  question: string;
-  options: Option[];
-  ownerUsername: string;
-}
-
-const Dashboard = () => {
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user, token } = useAuth();
+const Login: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login, register, isAuthenticated } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const location = useLocation();
+  
+  const from = location.state?.from?.pathname || '/dashboard';
 
+  // Navigate when authentication state changes
   useEffect(() => {
-    const fetchPolls = async () => {
-      if (token) {
-        try {
-          const fetchedPolls = await pollsAPI.getDashboardPolls();
-          setPolls(fetchedPolls);
-        } catch (error) {
-          console.error('Failed to fetch polls:', error);
-          toast({
-            title: "Error",
-            description: "Failed to load dashboard polls.",
-            variant: "destructive",
-          })
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-    fetchPolls();
-  }, [token, toast]);
+    if (isAuthenticated) {
+      console.log('User authenticated, navigating to:', from);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
-  const handleDelete = async (pollId: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.username || !formData.password) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
+    if (!isLogin && !formData.email) {
+      toast.error('Email is required for registration');
+      return;
+    }
+
+    setIsLoading(true);
+    
     try {
-      await pollsAPI.deletePoll(pollId);
-      setPolls(polls.filter((poll) => poll.id !== pollId));
-      toast({
-        title: "Success",
-        description: "Poll deleted successfully.",
-      })
-    } catch (error) {
-      console.error('Failed to delete poll:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete poll.",
-        variant: "destructive",
-      })
+      console.log('Starting authentication...', { isLogin, from });
+      if (isLogin) {
+        console.log('Attempting login...');
+        await login(formData.username, formData.password);
+        console.log('Login successful, navigating to:', from);
+        toast.success('Welcome back!');
+      } else {
+        console.log('Attempting registration...');  
+        await register(formData.username, formData.email, formData.password);
+        console.log('Registration successful, navigating to:', from);
+        toast.success('Account created successfully!');
+      }
+      
+      console.log('Authentication successful, waiting for state update...');
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      const errorMessage = error.message || 'Authentication failed';
+      
+      if (errorMessage.includes('401') || errorMessage.includes('Invalid credentials')) {
+        toast.error('Invalid username or password');
+      } else if (errorMessage.includes('400')) {
+        toast.error('Please check your input and try again');
+      } else {
+        toast.error(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className="text-center mt-8">Loading polls...</div>;
-  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button onClick={() => navigate('/create')}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Create Poll
-        </Button>
-      </div>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      {/* Theme Toggle */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={toggleTheme}
+        className="fixed top-4 right-4 p-2 rounded-md hover:bg-accent transition-colors z-10"
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? (
+          <SunIcon className="w-5 h-5" />
+        ) : (
+          <MoonIcon className="w-5 h-5" />
+        )}
+      </motion.button>
 
-      {polls.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          <h2 className="text-xl font-semibold">No polls found!</h2>
-          <p className="text-muted-foreground mt-2 mb-4">Click the button above to create your first poll.</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center space-x-2">
+            <ChartBarIcon className="w-10 h-10 text-primary" />
+            <span className="text-2xl font-bold gradient-text">PollCreator</span>
+          </Link>
         </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {polls.map((poll) => (
-            <Card key={poll.id}>
-              <CardHeader>
-                <CardTitle>{poll.question}</CardTitle>
-                <CardDescription>Created by: {poll.ownerUsername}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {poll.options && poll.options.length > 0 ? (
-                    poll.options.map((option) => (
-                      <li key={option.id} className="flex justify-between items-center text-sm py-1">
-                        <span>{option.text}</span>
-                        <span className="font-semibold">{option.votes} votes</span>
-                      </li>
-                    ))
+
+        {/* Auth Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}  
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="card-elevated p-8"
+        >
+          {/* Toggle Buttons */}
+          <div className="flex mb-8 bg-secondary rounded-lg p-1">
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                isLogin
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(false)}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
+                !isLogin
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Register
+            </button>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium mb-2">
+                Username
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                value={formData.username}
+                onChange={handleInputChange}
+                className="input-field"
+                placeholder="Enter your username"
+              />
+            </div>
+
+            {!isLogin && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required={!isLogin}
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="your@email.com"
+                />
+              </motion.div>
+            )}
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="input-field pr-12"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-5 h-5 text-muted-foreground hover:text-foreground" />
                   ) : (
-                    <li className="text-sm text-muted-foreground">No options available for this poll.</li>
+                    <EyeIcon className="w-5 h-5 text-muted-foreground hover:text-foreground" />
                   )}
-                </ul>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" onClick={() => navigate(`/polls/${poll.id}`)}>
-                  <BarChart2 className="mr-2 h-4 w-4" /> View
-                </Button>
-                
-                {user && user.username === poll.ownerUsername && (
-                   <AlertDialog>
-                   <AlertDialogTrigger asChild>
-                     <Button variant="destructive">
-                       <Trash2 className="mr-2 h-4 w-4" /> Delete
-                     </Button>
-                   </AlertDialogTrigger>
-                   <AlertDialogContent>
-                     <AlertDialogHeader>
-                       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                       <AlertDialogDescription>
-                         This action cannot be undone. This will permanently delete your poll
-                         and remove its data from our servers.
-                       </AlertDialogDescription>
-                     </AlertDialogHeader>
-                     <AlertDialogFooter>
-                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                       <AlertDialogAction onClick={() => handleDelete(poll.id)}>Continue</AlertDialogAction>
-                     </AlertDialogFooter>
-                   </AlertDialogContent>
-                 </AlertDialog>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
+                </button>
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed relative"
+            >
+              {isLoading && (
+                <div className="spinner w-4 h-4 absolute left-4"></div>
+              )}
+              <span className={isLoading ? 'ml-6' : ''}>
+                {isLoading 
+                  ? (isLogin ? 'Signing in...' : 'Creating account...') 
+                  : (isLogin ? 'Sign In' : 'Create Account')
+                }
+              </span>
+            </motion.button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            {isLogin ? (
+              <p>
+                Need an account?{' '}
+                <button
+                  onClick={() => setIsLogin(false)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Register here
+                </button>
+              </p>
+            ) : (
+              <p>
+                Already have an account?{' '}
+                <button
+                  onClick={() => setIsLogin(true)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Login here
+                </button>
+              </p>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link
+            to="/"
+            className="text-muted-foreground hover:text-primary transition-colors text-sm"
+          >
+            ← Back to Home
+          </Link>
         </div>
-      )}
+      </motion.div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Login;

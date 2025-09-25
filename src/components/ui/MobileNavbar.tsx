@@ -51,7 +51,7 @@ const MobileNavbar: React.FC = () => {
             <Bars3Icon className="w-6 h-6" />
           )}
         </button>
-        <span className="font-bold text-lg">Poll Scribe</span>
+        <span className="font-bold text-lg">PollCreator</span>
       </div>
       {open && (
         <div className="bg-background border-t border-border">

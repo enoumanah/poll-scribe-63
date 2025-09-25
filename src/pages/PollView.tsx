@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import { pollsAPI } from "@/services/api";
-import { useAuth } from "@/contexts/AuthContext";
-import Navigation from "@/components/ui/Navigation";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-toastify';
+import { pollsAPI } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
+import Navigation from '@/components/ui/Navigation';
 import {
   ChartBarIcon,
   ShareIcon,
   ClipboardDocumentIcon,
   CheckCircleIcon,
-  ArrowLeftIcon,
-} from "@heroicons/react/24/outline";
+  ArrowLeftIcon
+} from '@heroicons/react/24/outline';
 
 interface PollOption {
   id: string;
@@ -23,34 +23,25 @@ interface Poll {
   id: string;
   question: string;
   options: PollOption[];
-  visibility: "public" | "private";
+  visibility: 'public' | 'private';
   shareLink?: string;
   createdAt: string;
+  totalVotes: number;
   hasVoted?: boolean;
   userVoteOptionId?: string;
-}
-
-interface PollResults {
-  question: string;
-  options: {
-    text: string;
-    votes: number;
-    percentage: number;
-    id: string;
-  }[];
 }
 
 const PollView: React.FC = () => {
   const { id, shareLink } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-
+  
   const [poll, setPoll] = useState<Poll | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>('');
   const [isVoting, setIsVoting] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [results, setResults] = useState<PollResults | null>(null);
+  const [results, setResults] = useState<PollOption[]>([]);
 
   useEffect(() => {
     fetchPoll();
@@ -59,77 +50,72 @@ const PollView: React.FC = () => {
   const fetchPoll = async () => {
     try {
       setIsLoading(true);
-
+      
       let pollData: Poll;
       if (shareLink) {
         pollData = await pollsAPI.getPollByShareLink(shareLink);
       } else if (id) {
         pollData = await pollsAPI.getPoll(id);
       } else {
-        throw new Error("No poll identifier provided");
+        throw new Error('No poll identifier provided');
       }
-
+      
       setPoll(pollData);
-
-      // Always fetch results to get accurate vote counts and percentages
-      await fetchResults(pollData.id);
-
-      if (pollData.hasVoted) {
+      
+      // Check if user has already voted or if we should show results
+      if (pollData.hasVoted || pollData.totalVotes > 0) {
+        await fetchResults();
         setShowResults(true);
       }
     } catch (error: any) {
-      console.error("Failed to fetch poll:", error);
-      if (error.message.includes("401")) {
-        toast.error("Please login to view this poll");
-        navigate("/login");
-      } else if (error.message.includes("404")) {
-        toast.error("Poll not found");
-        navigate(isAuthenticated ? "/dashboard" : "/");
+      console.error('Failed to fetch poll:', error);
+      if (error.message.includes('401')) {
+        toast.error('Please login to view this poll');
+        navigate('/login');
+      } else if (error.message.includes('404')) {
+        toast.error('Poll not found');
+        navigate('/dashboard');
       } else {
-        toast.error("Failed to load poll");
+        toast.error('Failed to load poll');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchResults = async (pollId: string) => {
+  const fetchResults = async () => {
+    if (!poll?.id) return;
+    
     try {
-      const resultsData: PollResults = await pollsAPI.getResults(pollId);
-      setResults(resultsData);
+      const resultsData = await pollsAPI.getResults(poll.id);
+      setResults(resultsData.options || poll.options);
     } catch (error) {
-      console.error("Failed to fetch results:", error);
-      toast.error("Failed to fetch poll results");
+      console.error('Failed to fetch results:', error);
+      // Fallback to poll data
+      setResults(poll.options);
     }
   };
 
   const handleVote = async (optionId: string) => {
     if (!poll || !isAuthenticated) {
-      toast.error("Please login to vote");
-      navigate("/login");
+      toast.error('Please login to vote');
+      navigate('/login');
       return;
     }
 
     setIsVoting(true);
-
+    
     try {
       await pollsAPI.vote(poll.id, { optionId: optionId });
-
-      // Update poll state to show user has voted
-      setPoll((prevPoll) =>
-        prevPoll
-          ? { ...prevPoll, hasVoted: true, userVoteOptionId: optionId }
-          : prevPoll
-      );
-
+      
       // Fetch updated results
-      await fetchResults(poll.id);
+      await fetchResults();
       setShowResults(true);
-
-      toast.success("Vote submitted successfully!");
+      
+      toast.success('Vote submitted successfully!');
     } catch (error: any) {
-      console.error("Failed to vote:", error);
-      toast.error("Failed to submit vote. Please try again.");
+      console.error('Failed to vote:', error);
+      toast.error('Failed to submit vote. Please try again.');
     } finally {
       setIsVoting(false);
     }
@@ -137,28 +123,26 @@ const PollView: React.FC = () => {
 
   const handleShare = async () => {
     if (!poll) return;
-
-    const shareUrl =
-      poll.visibility === "private" && poll.shareLink
-        ? `${window.location.origin}/share/${poll.shareLink}`
-        : `${window.location.origin}/polls/${poll.id}`;
+    
+    const shareUrl = poll.visibility === 'private' && poll.shareLink
+      ? `${window.location.origin}/share/${poll.shareLink}`
+      : `${window.location.origin}/polls/${poll.id}`;
 
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Poll link copied to clipboard!");
+      toast.success('Poll link copied to clipboard!');
     } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-      toast.error("Failed to copy link");
+      console.error('Failed to copy to clipboard:', error);
+      toast.error('Failed to copy link');
     }
   };
 
-  // Calculate total votes on the frontend from the results data
-  const totalVotes = results
-    ? results.options.reduce((sum, option) => sum + option.votes, 0)
-    : 0;
-  const maxVotes = results
-    ? Math.max(...results.options.map((option) => option.votes), 1)
-    : 1;
+  const getResultPercentage = (optionVotes: number, totalVotes: number) => {
+    if (totalVotes === 0) return 0;
+    return Math.round((optionVotes / totalVotes) * 100);
+  };
+
+  const maxVotes = Math.max(...results.map(option => option.voteCount), 1);
 
   if (isLoading) {
     return (
@@ -191,7 +175,7 @@ const PollView: React.FC = () => {
               The poll you're looking for doesn't exist or has been removed.
             </p>
             <button
-              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/")}
+              onClick={() => navigate(isAuthenticated ? '/dashboard' : '/')}
               className="btn-primary"
             >
               Go Back
@@ -205,7 +189,7 @@ const PollView: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       {isAuthenticated && <Navigation />}
-
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -215,7 +199,7 @@ const PollView: React.FC = () => {
         <div className="max-w-3xl mx-auto">
           {/* Back Button */}
           <button
-            onClick={() => navigate(isAuthenticated ? "/dashboard" : "/")}
+            onClick={() => navigate(isAuthenticated ? '/dashboard' : '/')}
             className="btn-secondary mb-6 inline-flex items-center space-x-2"
           >
             <ArrowLeftIcon className="w-4 h-4" />
@@ -236,20 +220,18 @@ const PollView: React.FC = () => {
                   {poll.question}
                 </h1>
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <span>
-                    {totalVotes} {totalVotes === 1 ? "vote" : "votes"}
-                  </span>
+                  <span>{poll.totalVotes} {poll.totalVotes === 1 ? 'vote' : 'votes'}</span>
                   <span>•</span>
                   <span>
-                    {new Date(poll.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
+                    {new Date(poll.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     })}
                   </span>
                 </div>
               </div>
-
+              
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
@@ -271,10 +253,8 @@ const PollView: React.FC = () => {
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <h3 className="text-lg font-semibold mb-6">
-                    Choose your answer:
-                  </h3>
-
+                  <h3 className="text-lg font-semibold mb-6">Choose your answer:</h3>
+                  
                   <div className="space-y-4 mb-8">
                     {poll.options.map((option, index) => (
                       <motion.label
@@ -282,8 +262,8 @@ const PollView: React.FC = () => {
                         whileHover={{ scale: 1.02 }}
                         className={`block p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                           selectedOption === option.id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
                         }`}
                       >
                         <div className="flex items-center space-x-3">
@@ -295,9 +275,7 @@ const PollView: React.FC = () => {
                             onChange={(e) => setSelectedOption(e.target.value)}
                             className="w-4 h-4 text-primary focus:ring-primary"
                           />
-                          <span className="text-base font-medium">
-                            {option.text}
-                          </span>
+                          <span className="text-base font-medium">{option.text}</span>
                         </div>
                       </motion.label>
                     ))}
@@ -313,8 +291,8 @@ const PollView: React.FC = () => {
                     {isVoting && (
                       <div className="spinner w-4 h-4 absolute left-6"></div>
                     )}
-                    <span className={isVoting ? "ml-6" : ""}>
-                      {isVoting ? "Submitting..." : "Submit Vote"}
+                    <span className={isVoting ? 'ml-6' : ''}>
+                      {isVoting ? 'Submitting...' : 'Submit Vote'}
                     </span>
                   </motion.button>
                 </motion.div>
@@ -333,24 +311,23 @@ const PollView: React.FC = () => {
                       <CheckCircleIcon className="w-5 h-5 text-green-500" />
                     )}
                   </div>
-
+                  
                   <div className="space-y-4">
-                    {results?.options.map((option, index) => {
-                      const percentage = option.percentage;
-                      const isWinning =
-                        option.votes === maxVotes && totalVotes > 0;
+                    {results.map((option, index) => {
+                      const percentage = getResultPercentage(option.voteCount, poll.totalVotes);
+                      const isWinning = option.voteCount === maxVotes && poll.totalVotes > 0;
                       const isUserVote = poll.userVoteOptionId === option.id;
-
+                      
                       return (
                         <motion.div
-                          key={option.text}
+                          key={option.id}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5, delay: index * 0.1 }}
                           className={`p-4 rounded-lg border ${
-                            isUserVote
-                              ? "border-primary bg-primary/5"
-                              : "border-border"
+                            isUserVote 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-border'
                           }`}
                         >
                           <div className="flex justify-between items-center mb-3">
@@ -359,26 +336,25 @@ const PollView: React.FC = () => {
                               {isUserVote && (
                                 <CheckCircleIcon className="w-4 h-4 text-primary" />
                               )}
-                              {isWinning && totalVotes > 0 && (
+                              {isWinning && poll.totalVotes > 0 && (
                                 <span className="badge-success">Leading</span>
                               )}
                             </div>
                             <div className="text-right">
                               <div className="font-semibold">{percentage}%</div>
                               <div className="text-sm text-muted-foreground">
-                                {option.votes}{" "}
-                                {option.votes === 1 ? "vote" : "votes"}
+                                {option.voteCount} {option.voteCount === 1 ? 'vote' : 'votes'}
                               </div>
                             </div>
                           </div>
-
+                          
                           <div className="w-full bg-secondary rounded-full h-2">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${percentage}%` }}
                               transition={{ duration: 0.5, delay: index * 0.1 }}
                               className={`h-2 rounded-full ${
-                                isUserVote ? "bg-primary" : "bg-primary/70"
+                                isUserVote ? 'bg-primary' : 'bg-primary/70'
                               }`}
                             />
                           </div>
@@ -391,7 +367,7 @@ const PollView: React.FC = () => {
             </AnimatePresence>
 
             {/* Share Link for Private Polls */}
-            {poll.visibility === "private" && poll.shareLink && (
+            {poll.visibility === 'private' && poll.shareLink && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -405,7 +381,7 @@ const PollView: React.FC = () => {
                       Share this link to let others vote on your private poll
                     </p>
                   </div>
-
+                  
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}

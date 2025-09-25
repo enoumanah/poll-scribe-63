@@ -2,63 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PollCreator Design System - Production Ready Colors & Styles */
+/* PollHub Design System - Production Ready Colors & Styles */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @layer base {
   :root {
     /* Brand Colors - Based on UI Requirements */
     --background: 0 0% 100%;
     --foreground: 213 27% 27%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 213 27% 27%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 213 27% 27%;
-    
+
     /* Primary Blue - #2563EB */
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 217 91% 55%;
-    
+
     /* Secondary Gray - #F7FAFC */
     --secondary: 210 20% 98%;
     --secondary-foreground: 213 27% 27%;
-    
+
     /* Muted Gray - #4A5568 */
     --muted: 210 20% 98%;
     --muted-foreground: 215 25% 37%;
-    
+
     --accent: 210 20% 98%;
     --accent-foreground: 213 27% 27%;
-    
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 217 91% 60%;
-    
+
     --radius: 0.5rem;
-    
+
     /* Success and Status Colors */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    
+
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(221 83% 53%) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 60%),
+      hsl(217 91% 55%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(217 91% 60%) 0%,
+      hsl(221 83% 53%) 100%
+    );
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+      0 8px 10px -6px rgb(0 0 0 / 0.1);
+
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -84,50 +95,61 @@
     /* Dark Mode - #1A202C Background */
     --background: 220 26% 14%;
     --foreground: 0 0% 100%;
-    
+
     --card: 220 26% 14%;
     --card-foreground: 0 0% 100%;
-    
+
     --popover: 220 26% 14%;
     --popover-foreground: 0 0% 100%;
-    
+
     /* Primary stays blue */
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
     --primary-hover: 217 91% 65%;
-    
+
     /* Secondary Dark Gray */
     --secondary: 215 28% 17%;
     --secondary-foreground: 0 0% 100%;
-    
+
     --muted: 215 28% 17%;
     --muted-foreground: 215 20% 65%;
-    
+
     --accent: 215 28% 17%;
     --accent-foreground: 0 0% 100%;
-    
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    
+
     --border: 215 28% 17%;
     --input: 215 28% 17%;
     --ring: 217 91% 60%;
-    
+
     /* Success and Status Colors - Dark Mode */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    
+
     /* Dark Mode Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(221 83% 65%) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(217 91% 60%),
+      hsl(217 91% 65%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(217 91% 60%) 0%,
+      hsl(221 83% 65%) 100%
+    );
+
     /* Dark Mode Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3),
+      0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3),
+      0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3),
+      0 8px 10px -6px rgb(0 0 0 / 0.3);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -159,51 +181,51 @@
   .btn-primary {
     @apply bg-primary text-primary-foreground font-medium px-6 py-3 rounded-md shadow-md hover:bg-primary-hover transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
-  
+
   .btn-secondary {
     @apply bg-secondary text-secondary-foreground font-medium px-6 py-3 rounded-md border border-border hover:bg-accent transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
-  
+
   .btn-outline {
     @apply bg-transparent text-primary font-medium px-6 py-3 rounded-md border border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
-  
+
   .btn-danger {
     @apply bg-destructive text-destructive-foreground font-medium px-6 py-3 rounded-md shadow-md hover:bg-red-700 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2;
   }
-  
+
   /* Card Components */
   .card-elevated {
     @apply bg-card text-card-foreground rounded-lg shadow-lg border border-border hover:shadow-xl transition-all duration-300 hover:-translate-y-1;
   }
-  
+
   .card-flat {
     @apply bg-card text-card-foreground rounded-lg border border-border hover:border-primary/50 transition-all duration-200;
   }
-  
+
   /* Form Inputs */
   .input-field {
     @apply w-full px-4 py-3 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 placeholder:text-muted-foreground;
   }
-  
+
   /* Status Badges */
   .badge-success {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100;
   }
-  
+
   .badge-warning {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100;
   }
-  
+
   .badge-private {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100;
   }
-  
+
   /* Loading Spinner */
   .spinner {
     @apply animate-spin rounded-full border-2 border-muted-foreground border-t-primary;
   }
-  
+
   /* Gradient Text */
   .gradient-text {
     background: var(--gradient-primary);

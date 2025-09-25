@@ -62,7 +62,7 @@ const Landing: React.FC = () => {
       <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b border-border">
         <div className="flex items-center space-x-2">
           <ChartBarIcon className="w-8 h-8 text-primary" />
-          <span className="text-xl font-bold gradient-text">PollCreator</span>
+          <span className="text-xl font-bold gradient-text">PollHub</span>
         </div>
 
         <div className="flex items-center space-x-4">

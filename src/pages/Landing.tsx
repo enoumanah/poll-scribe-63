@@ -197,7 +197,7 @@ const Landing: React.FC = () => {
 
             <div className="flex space-x-6 text-sm text-muted-foreground">
               <a
-                href="https://github.com"
+                href="https://github.com/enoumanah"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors"
@@ -205,7 +205,7 @@ const Landing: React.FC = () => {
                 GitHub
               </a>
               <Link
-                to="/privacy"
+                to="https://www.linkedin.com/in/eno-umanah/"
                 className="hover:text-primary transition-colors"
               >
                 Linkdin

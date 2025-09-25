@@ -1,80 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { toast } from "react-toastify";
 import {
   ChartBarIcon,
   EyeIcon,
   EyeSlashIcon,
   SunIcon,
-  MoonIcon
-} from '@heroicons/react/24/outline';
+  MoonIcon,
+} from "@heroicons/react/24/outline";
 
 const Login: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
+    username: "",
+    email: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login, register, isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const from = location.state?.from?.pathname || '/dashboard';
+
+  const from = location.state?.from?.pathname || "/dashboard";
 
   // Navigate when authentication state changes
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('User authenticated, navigating to:', from);
+      console.log("User authenticated, navigating to:", from);
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.username || !formData.password) {
-      toast.error('Please fill in all required fields');
+      toast.error("Please fill in all required fields");
       return;
     }
-    
+
     if (!isLogin && !formData.email) {
-      toast.error('Email is required for registration');
+      toast.error("Email is required for registration");
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
-      console.log('Starting authentication...', { isLogin, from });
+      console.log("Starting authentication...", { isLogin, from });
       if (isLogin) {
-        console.log('Attempting login...');
+        console.log("Attempting login...");
         await login(formData.username, formData.password);
-        console.log('Login successful, navigating to:', from);
-        toast.success('Welcome back!');
+        console.log("Login successful, navigating to:", from);
+        toast.success("Welcome back!");
       } else {
-        console.log('Attempting registration...');  
+        console.log("Attempting registration...");
         await register(formData.username, formData.email, formData.password);
-        console.log('Registration successful, navigating to:', from);
-        toast.success('Account created successfully!');
+        console.log("Registration successful, navigating to:", from);
+        toast.success("Account created successfully!");
       }
-      
-      console.log('Authentication successful, waiting for state update...');
+
+      console.log("Authentication successful, waiting for state update...");
     } catch (error: any) {
-      console.error('Auth error:', error);
-      const errorMessage = error.message || 'Authentication failed';
-      
-      if (errorMessage.includes('401') || errorMessage.includes('Invalid credentials')) {
-        toast.error('Invalid username or password');
-      } else if (errorMessage.includes('400')) {
-        toast.error('Please check your input and try again');
+      console.error("Auth error:", error);
+      const errorMessage = error.message || "Authentication failed";
+
+      if (
+        errorMessage.includes("401") ||
+        errorMessage.includes("Invalid credentials")
+      ) {
+        toast.error("Invalid username or password");
+      } else if (errorMessage.includes("400")) {
+        toast.error("Please check your input and try again");
       } else {
         toast.error(errorMessage);
       }
@@ -102,7 +105,7 @@ const Login: React.FC = () => {
         className="fixed top-4 right-4 p-2 rounded-md hover:bg-accent transition-colors z-10"
         aria-label="Toggle theme"
       >
-        {theme === 'dark' ? (
+        {theme === "dark" ? (
           <SunIcon className="w-5 h-5" />
         ) : (
           <MoonIcon className="w-5 h-5" />
@@ -119,7 +122,7 @@ const Login: React.FC = () => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
             <ChartBarIcon className="w-10 h-10 text-primary" />
-            <span className="text-2xl font-bold gradient-text">PollCreator</span>
+            <span className="text-2xl font-bold gradient-text">PollHub</span>
           </Link>
         </div>
 
@@ -137,8 +140,8 @@ const Login: React.FC = () => {
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
                 isLogin
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Login
@@ -148,8 +151,8 @@ const Login: React.FC = () => {
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 ${
                 !isLogin
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Register
@@ -159,7 +162,10 @@ const Login: React.FC = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium mb-2"
+              >
                 Username
               </label>
               <input
@@ -177,11 +183,14 @@ const Login: React.FC = () => {
             {!isLogin && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium mb-2"
+                >
                   Email
                 </label>
                 <input
@@ -198,14 +207,17 @@ const Login: React.FC = () => {
             )}
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2"
+              >
                 Password
               </label>
               <div className="relative">
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleInputChange}
@@ -236,11 +248,14 @@ const Login: React.FC = () => {
               {isLoading && (
                 <div className="spinner w-4 h-4 absolute left-4"></div>
               )}
-              <span className={isLoading ? 'ml-6' : ''}>
-                {isLoading 
-                  ? (isLogin ? 'Signing in...' : 'Creating account...') 
-                  : (isLogin ? 'Sign In' : 'Create Account')
-                }
+              <span className={isLoading ? "ml-6" : ""}>
+                {isLoading
+                  ? isLogin
+                    ? "Signing in..."
+                    : "Creating account..."
+                  : isLogin
+                  ? "Sign In"
+                  : "Create Account"}
               </span>
             </motion.button>
           </form>
@@ -249,7 +264,7 @@ const Login: React.FC = () => {
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {isLogin ? (
               <p>
-                Need an account?{' '}
+                Need an account?{" "}
                 <button
                   onClick={() => setIsLogin(false)}
                   className="text-primary hover:underline font-medium"
@@ -259,7 +274,7 @@ const Login: React.FC = () => {
               </p>
             ) : (
               <p>
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <button
                   onClick={() => setIsLogin(true)}
                   className="text-primary hover:underline font-medium"

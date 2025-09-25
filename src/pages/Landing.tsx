@@ -98,7 +98,7 @@ const Landing: React.FC = () => {
             variants={itemVariants}
             className="text-4xl md:text-6xl font-bold mb-6 gradient-text"
           >
-            PollCreator
+            PollHub
           </motion.h1>
 
           <motion.p
@@ -192,7 +192,7 @@ const Landing: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <ChartBarIcon className="w-6 h-6 text-primary" />
-              <span className="text-lg font-semibold">PollCreator</span>
+              <span className="text-lg font-semibold">PollHub</span>
             </div>
 
             <div className="flex space-x-6 text-sm text-muted-foreground">

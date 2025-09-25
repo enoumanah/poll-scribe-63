@@ -1,18 +1,18 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { 
-  HomeIcon, 
-  PlusIcon, 
-  ChartBarIcon, 
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import {
+  HomeIcon,
+  PlusIcon,
+  ChartBarIcon,
   UserIcon,
   SunIcon,
   MoonIcon,
   ArrowRightOnRectangleIcon,
-  ClockIcon
-} from '@heroicons/react/24/outline';
+  ClockIcon,
+} from "@heroicons/react/24/outline";
 
 const Navigation: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
@@ -22,7 +22,7 @@ const Navigation: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   if (!isAuthenticated) {
@@ -30,9 +30,9 @@ const Navigation: React.FC = () => {
   }
 
   const navItems = [
-    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
-    { path: '/create', icon: PlusIcon, label: 'Create Poll' },
-    { path: '/my-activity', icon: ClockIcon, label: 'My Activity' },
+    { path: "/dashboard", icon: HomeIcon, label: "Dashboard" },
+    { path: "/create", icon: PlusIcon, label: "Create Poll" },
+    { path: "/my-activity", icon: ClockIcon, label: "My Activity" },
   ];
 
   return (
@@ -46,7 +46,7 @@ const Navigation: React.FC = () => {
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center space-x-2">
             <ChartBarIcon className="w-8 h-8 text-primary" />
-            <span className="text-xl font-bold gradient-text">PollCreator</span>
+            <span className="text-xl font-bold gradient-text">PollHub</span>
           </Link>
 
           {/* Navigation Links */}
@@ -57,8 +57,8 @@ const Navigation: React.FC = () => {
                 to={path}
                 className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:scale-105 ${
                   location.pathname === path
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -77,7 +77,7 @@ const Navigation: React.FC = () => {
               className="p-2 rounded-md hover:bg-accent transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
+              {theme === "dark" ? (
                 <SunIcon className="w-5 h-5" />
               ) : (
                 <MoonIcon className="w-5 h-5" />
@@ -90,7 +90,7 @@ const Navigation: React.FC = () => {
                 <UserIcon className="w-5 h-5 text-muted-foreground" />
                 <span className="text-sm font-medium">{user?.username}</span>
               </div>
-              
+
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
@@ -111,7 +111,7 @@ const Navigation: React.FC = () => {
               onClick={toggleTheme}
               className="p-2 rounded-md hover:bg-accent transition-colors"
             >
-              {theme === 'dark' ? (
+              {theme === "dark" ? (
                 <SunIcon className="w-5 h-5" />
               ) : (
                 <MoonIcon className="w-5 h-5" />

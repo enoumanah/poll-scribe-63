@@ -263,7 +263,75 @@ const PollView: React.FC = () => {
 
             {/* Voting Interface or Results */}
             <AnimatePresence mode="wait">
-              {!showResults ? (
+              {poll?.hasVoted ? (
+                <motion.div
+                  key="results"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="mb-4 p-3 rounded bg-green-50 text-green-700 border border-green-200 flex items-center">
+                    <CheckCircleIcon className="w-5 h-5 mr-2 text-green-500" />
+                    You have already voted. Here are the poll results.
+                  </div>
+                  <div className="flex items-center space-x-2 mb-6">
+                    <ChartBarIcon className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Poll Results</h3>
+                    <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                  </div>
+                  <div className="space-y-4">
+                    {results?.options.map((option, index) => {
+                      const percentage = option.percentage;
+                      const isWinning =
+                        option.votes === maxVotes && totalVotes > 0;
+                      const isUserVote = poll?.userVoteOptionId === option.id;
+                      return (
+                        <motion.div
+                          key={option.text}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          className={`p-4 rounded-lg border ${
+                            isUserVote
+                              ? "border-primary bg-primary/5"
+                              : "border-border"
+                          }`}
+                        >
+                          <div className="flex justify-between items-center mb-3">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium">{option.text}</span>
+                              {isUserVote && (
+                                <CheckCircleIcon className="w-4 h-4 text-primary" />
+                              )}
+                              {isWinning && totalVotes > 0 && (
+                                <span className="badge-success">Leading</span>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <div className="font-semibold">{percentage}%</div>
+                              <div className="text-sm text-muted-foreground">
+                                {option.votes}{" "}
+                                {option.votes === 1 ? "vote" : "votes"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-full bg-secondary rounded-full h-2">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentage}%` }}
+                              transition={{ duration: 0.5, delay: index * 0.1 }}
+                              className={`h-2 rounded-full ${
+                                isUserVote ? "bg-primary" : "bg-primary/70"
+                              }`}
+                            />
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              ) : (
                 <motion.div
                   key="voting"
                   initial={{ opacity: 0, x: -20 }}
@@ -321,81 +389,8 @@ const PollView: React.FC = () => {
                     </span>
                   </motion.button>
                 </motion.div>
-              ) : (
-                <motion.div
-                  key="results"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {poll.hasVoted && (
-                    <div className="mb-4 p-3 rounded bg-green-50 text-green-700 border border-green-200 flex items-center">
-                      <CheckCircleIcon className="w-5 h-5 mr-2 text-green-500" />
-                      You have already voted. Here are the poll results.
-                    </div>
-                  )}
-                  <div className="flex items-center space-x-2 mb-6">
-                    <ChartBarIcon className="w-5 h-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Poll Results</h3>
-                    {poll.hasVoted && (
-                      <CheckCircleIcon className="w-5 h-5 text-green-500" />
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    {results?.options.map((option, index) => {
-                      const percentage = option.percentage;
-                      const isWinning =
-                        option.votes === maxVotes && totalVotes > 0;
-                      const isUserVote = poll?.userVoteOptionId === option.id;
-                      return (
-                        <motion.div
-                          key={option.text}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: index * 0.1 }}
-                          className={`p-4 rounded-lg border ${
-                            isUserVote
-                              ? "border-primary bg-primary/5"
-                              : "border-border"
-                          }`}
-                        >
-                          <div className="flex justify-between items-center mb-3">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium">{option.text}</span>
-                              {isUserVote && (
-                                <CheckCircleIcon className="w-4 h-4 text-primary" />
-                              )}
-                              {isWinning && totalVotes > 0 && (
-                                <span className="badge-success">Leading</span>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <div className="font-semibold">{percentage}%</div>
-                              <div className="text-sm text-muted-foreground">
-                                {option.votes}{" "}
-                                {option.votes === 1 ? "vote" : "votes"}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-full bg-secondary rounded-full h-2">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ duration: 0.5, delay: index * 0.1 }}
-                              className={`h-2 rounded-full ${
-                                isUserVote ? "bg-primary" : "bg-primary/70"
-                              }`}
-                            />
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
               )}
             </AnimatePresence>
-
             {/* Share Link for Private Polls */}
             {poll.visibility === "private" && poll.shareLink && (
               <motion.div

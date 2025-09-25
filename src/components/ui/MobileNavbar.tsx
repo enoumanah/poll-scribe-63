@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  MenuIcon,
-  XIcon,
+  Bars3Icon,
+  XMarkIcon,
   HomeIcon,
   UserIcon,
   ChartPieIcon,
   PlusIcon,
   LockClosedIcon,
-} from "@heroicons/react/outline";
+} from "@heroicons/react/24/outline";
 
 const navLinks = [
   {
@@ -46,9 +46,9 @@ const MobileNavbar: React.FC = () => {
           aria-label={open ? "Close menu" : "Open menu"}
         >
           {open ? (
-            <XIcon className="w-6 h-6" />
+            <XMarkIcon className="w-6 h-6" />
           ) : (
-            <MenuIcon className="w-6 h-6" />
+            <Bars3Icon className="w-6 h-6" />
           )}
         </button>
         <span className="font-bold text-lg">Poll Scribe</span>

@@ -1,4 +1,4 @@
-# PollCreator - Complete React Polling Application
+# PollHub - Complete React Polling Application
 
 A production-ready polling application built with React, TypeScript, Tailwind CSS, and Framer Motion. Create polls, collect votes, and visualize results with beautiful animations and responsive design.
 

@@ -208,7 +208,7 @@ const Landing: React.FC = () => {
                 to="/privacy"
                 className="hover:text-primary transition-colors"
               >
-                Privacy Policy
+                Linkdin
               </Link>
             </div>
           </div>

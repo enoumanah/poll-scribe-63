@@ -28,22 +28,26 @@ A production-ready polling application built with React, TypeScript, Tailwind CS
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd poll-creator
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment setup**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Edit `.env` and configure your API URL:
+
    ```
    VITE_API_URL=https://poll-api-7doi.onrender.com/api
    ```
@@ -91,30 +95,35 @@ The application uses a comprehensive design system defined in `src/index.css`:
 ## 📱 Pages & Features
 
 ### 🏠 Landing Page (`/`)
+
 - Hero section with call-to-action
 - Feature highlights
 - Theme toggle
 - Responsive design
 
 ### 🔐 Authentication (`/login`)
+
 - Login/Register toggle
 - Form validation
 - Password visibility toggle
 - Error handling with toasts
 
 ### 📊 Dashboard (`/dashboard`)
+
 - Poll grid with animations
 - Create, view, share, delete actions
 - Empty state with call-to-action
 - Responsive card layout
 
 ### ➕ Create Poll (`/create`)
+
 - Dynamic option management (2-10 options)
 - Public/private visibility settings
 - Form validation
 - Character limits
 
 ### 🗳️ Poll View (`/polls/:id` & `/share/:shareLink`)
+
 - Interactive voting interface
 - Real-time results with animated bars
 - Share functionality
@@ -126,7 +135,7 @@ The app integrates with a Spring Boot backend API:
 
 - **Base URL**: `https://poll-api-7doi.onrender.com/api`
 - **Authentication**: JWT token-based
-- **Endpoints**: 
+- **Endpoints**:
   - `POST /auth/login` - User authentication
   - `POST /auth/register` - User registration
   - `GET /polls` - Fetch user's polls
@@ -171,24 +180,28 @@ VITE_API_URL=https://poll-api-7doi.onrender.com/api
 ## 🎯 Key Features Implementation
 
 ### Authentication Flow
+
 - JWT token storage in localStorage
 - Automatic token validation
 - Route protection for authenticated pages
 - Redirect to login for unauthenticated users
 
 ### Theme System
+
 - Dark/light mode toggle
 - localStorage persistence
 - System preference detection
 - Smooth theme transitions
 
 ### Animation System
+
 - Page transitions with Framer Motion
 - Staggered list animations
 - Hover effects and micro-interactions
 - Loading states with spinners
 
 ### Responsive Design
+
 - Mobile-first approach
 - Flexible grid layouts
 - Touch-friendly interactions
@@ -211,4 +224,4 @@ For questions or issues, please open a GitHub issue or contact through the appli
 
 ---
 
-**Built with ❤️ using React, TypeScript, and Tailwind CSS**
+**Built using React, TypeScript, and Tailwind CSS**

@@ -29,6 +29,7 @@ interface Poll {
   hasVoted?: boolean;
   userVoteOptionId?: string;
 }
+
 interface PollResults {
   question: string;
   options: {
@@ -151,6 +152,7 @@ const PollView: React.FC = () => {
     }
   };
 
+  // Calculate total votes on the frontend from the results data
   const totalVotes = results
     ? results.options.reduce((sum, option) => sum + option.votes, 0)
     : 0;

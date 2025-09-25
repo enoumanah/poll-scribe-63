@@ -274,7 +274,6 @@ const PollView: React.FC = () => {
                   <h3 className="text-lg font-semibold mb-6">
                     Choose your answer:
                   </h3>
-
                   <div className="space-y-4 mb-8">
                     {poll.options.map((option, index) => (
                       <motion.label
@@ -294,6 +293,7 @@ const PollView: React.FC = () => {
                             checked={selectedOption === option.id}
                             onChange={(e) => setSelectedOption(e.target.value)}
                             className="w-4 h-4 text-primary focus:ring-primary"
+                            disabled={poll?.hasVoted}
                           />
                           <span className="text-base font-medium">
                             {option.text}
@@ -302,19 +302,22 @@ const PollView: React.FC = () => {
                       </motion.label>
                     ))}
                   </div>
-
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => selectedOption && handleVote(selectedOption)}
-                    disabled={!selectedOption || isVoting}
+                    disabled={!selectedOption || isVoting || poll?.hasVoted}
                     className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed relative"
                   >
                     {isVoting && (
                       <div className="spinner w-4 h-4 absolute left-6"></div>
                     )}
                     <span className={isVoting ? "ml-6" : ""}>
-                      {isVoting ? "Submitting..." : "Submit Vote"}
+                      {poll?.hasVoted
+                        ? "You have already voted"
+                        : isVoting
+                        ? "Submitting..."
+                        : "Submit Vote"}
                     </span>
                   </motion.button>
                 </motion.div>
@@ -326,6 +329,12 @@ const PollView: React.FC = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
                 >
+                  {poll.hasVoted && (
+                    <div className="mb-4 p-3 rounded bg-green-50 text-green-700 border border-green-200 flex items-center">
+                      <CheckCircleIcon className="w-5 h-5 mr-2 text-green-500" />
+                      You have already voted. Here are the poll results.
+                    </div>
+                  )}
                   <div className="flex items-center space-x-2 mb-6">
                     <ChartBarIcon className="w-5 h-5 text-primary" />
                     <h3 className="text-lg font-semibold">Poll Results</h3>
@@ -333,14 +342,12 @@ const PollView: React.FC = () => {
                       <CheckCircleIcon className="w-5 h-5 text-green-500" />
                     )}
                   </div>
-
                   <div className="space-y-4">
                     {results?.options.map((option, index) => {
                       const percentage = option.percentage;
                       const isWinning =
                         option.votes === maxVotes && totalVotes > 0;
                       const isUserVote = poll?.userVoteOptionId === option.id;
-
                       return (
                         <motion.div
                           key={option.text}
@@ -371,7 +378,6 @@ const PollView: React.FC = () => {
                               </div>
                             </div>
                           </div>
-
                           <div className="w-full bg-secondary rounded-full h-2">
                             <motion.div
                               initial={{ width: 0 }}

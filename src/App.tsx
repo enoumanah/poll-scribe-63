@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
+import MobileNavbar from "@/components/ui/MobileNavbar";
 
 // Pages
 import Landing from "./pages/Landing";
@@ -44,6 +45,8 @@ const App = () => (
             className="z-50"
           />
           <BrowserRouter>
+            {/* Mobile Navbar */}
+            <MobileNavbar />
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Landing />} />

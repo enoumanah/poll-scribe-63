@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useTheme } from '@/contexts/ThemeContext';
+import React from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   ChartBarIcon,
   PlusIcon,
@@ -9,8 +9,8 @@ import {
   UserGroupIcon,
   SunIcon,
   MoonIcon,
-  ArrowRightIcon
-} from '@heroicons/react/24/outline';
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
 
 const Landing: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -18,18 +18,21 @@ const Landing: React.FC = () => {
   const features = [
     {
       icon: PlusIcon,
-      title: 'Create Polls',
-      description: 'Build engaging polls with multiple options and custom visibility settings.',
+      title: "Create Polls",
+      description:
+        "Build engaging polls with multiple options and custom visibility settings.",
     },
     {
       icon: UserGroupIcon,
-      title: 'Real-time Voting',
-      description: 'Collect votes instantly with live results and beautiful visualizations.',
+      title: "Real-time Voting",
+      description:
+        "Collect votes instantly with live results and beautiful visualizations.",
     },
     {
       icon: ShareIcon,
-      title: 'Share Everywhere',
-      description: 'Generate shareable links for public polls or keep them private.',
+      title: "Share Everywhere",
+      description:
+        "Generate shareable links for public polls or keep them private.",
     },
   ];
 
@@ -61,7 +64,7 @@ const Landing: React.FC = () => {
           <ChartBarIcon className="w-8 h-8 text-primary" />
           <span className="text-xl font-bold gradient-text">PollCreator</span>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -70,13 +73,13 @@ const Landing: React.FC = () => {
             className="p-2 rounded-md hover:bg-accent transition-colors"
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? (
+            {theme === "dark" ? (
               <SunIcon className="w-5 h-5" />
             ) : (
               <MoonIcon className="w-5 h-5" />
             )}
           </motion.button>
-          
+
           <Link to="/login" className="btn-primary">
             Get Started
           </Link>
@@ -97,36 +100,40 @@ const Landing: React.FC = () => {
           >
             PollCreator
           </motion.h1>
-          
+
           <motion.p
             variants={itemVariants}
             className="text-xl md:text-2xl text-muted-foreground mb-4"
           >
             Create and Share Polls Effortlessly
           </motion.p>
-          
+
           <motion.p
             variants={itemVariants}
             className="text-base md:text-lg text-muted-foreground mb-12 max-w-2xl mx-auto"
           >
-            Build engaging polls, collect instant feedback, and visualize results with beautiful charts. 
-            Perfect for teams, educators, and content creators who want to engage their audience.
+            Build engaging polls, collect instant feedback, and visualize
+            results with beautiful charts. Perfect for teams, educators, and
+            content creators who want to engage their audience.
           </motion.p>
-          
+
           <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Link to="/login" className="btn-primary inline-flex items-center space-x-2">
+            <Link
+              to="/login"
+              className="btn-primary inline-flex items-center space-x-2"
+            >
               <span>Get Started</span>
               <ArrowRightIcon className="w-4 h-4" />
             </Link>
-            
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               onClick={() => {
-                document.getElementById('features')?.scrollIntoView({ 
-                  behavior: 'smooth' 
+                document.getElementById("features")?.scrollIntoView({
+                  behavior: "smooth",
                 });
               }}
               className="btn-outline"
@@ -152,11 +159,11 @@ const Landing: React.FC = () => {
               Everything You Need to Create Amazing Polls
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our platform provides all the tools you need to create, share, and analyze polls 
-              with ease and style.
+              Our platform provides all the tools you need to create, share, and
+              analyze polls with ease and style.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <motion.div
@@ -187,24 +194,30 @@ const Landing: React.FC = () => {
               <ChartBarIcon className="w-6 h-6 text-primary" />
               <span className="text-lg font-semibold">PollCreator</span>
             </div>
-            
+
             <div className="flex space-x-6 text-sm text-muted-foreground">
-              <a 
-                href="https://github.com" 
-                target="_blank" 
+              <a
+                href="https://github.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors"
               >
                 GitHub
               </a>
-              <Link to="/privacy" className="hover:text-primary transition-colors">
+              <Link
+                to="/privacy"
+                className="hover:text-primary transition-colors"
+              >
                 Privacy Policy
               </Link>
             </div>
           </div>
-          
+
           <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 PollCreator. Built with React, Tailwind CSS, and Framer Motion.</p>
+            <p>
+              &copy; 2025 PollHub. Built with React, Tailwind CSS, and Framer
+              Motion.
+            </p>
           </div>
         </div>
       </footer>

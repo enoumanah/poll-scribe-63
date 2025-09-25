@@ -74,8 +74,9 @@ const PollView: React.FC = () => {
       // Always fetch results to get accurate vote counts and percentages
       await fetchResults(pollData.id);
 
+      // If user has already voted, redirect to results page
       if (pollData.hasVoted) {
-        setShowResults(true);
+        navigate(`/polls/${pollData.id}/results`, { replace: true });
       }
     } catch (error: any) {
       console.error("Failed to fetch poll:", error);
@@ -122,9 +123,8 @@ const PollView: React.FC = () => {
           : prevPoll
       );
 
-      // Fetch updated results
-      await fetchResults(poll.id);
-      setShowResults(true);
+      // Redirect to results page after voting
+      navigate(`/polls/${poll.id}/results`);
 
       toast.success("Vote submitted successfully!");
     } catch (error: any) {

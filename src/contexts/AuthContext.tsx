@@ -1,85 +1,112 @@
-import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { authAPI, tokenManager } from '../services/api';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authAPI, tokenManager } from '@/services/api';
 import { jwtDecode } from 'jwt-decode';
 
-interface AuthContextType {
-  user: { username: string } | null;
-  token: string | null;
-  login: (credentials: any) => Promise<void>;
-  register: (userData: any) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
+interface User {
+  id: string;
+  username: string;
+  email: string;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
-interface DecodedToken {
-  sub: string; // Subject, which is the username
-  iat: number; // Issued at
-  exp: number; // Expiration time
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ username: string } | null>(null);
-  const [token, setToken] = useState<string | null>(tokenManager.getToken());
-  const [loading, setLoading] = useState(true);
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      try {
-        const decodedToken: DecodedToken = jwtDecode(token);
-        if (decodedToken.exp * 1000 > Date.now()) {
-          setUser({ username: decodedToken.sub });
-        } else {
-          tokenManager.removeToken();
-          setToken(null);
+    const initializeAuth = async () => {
+      const token = tokenManager.getToken();
+      if (token) {
+        try {
+          // Decode the token to get the real user's username
+          const decodedToken: { sub: string } = jwtDecode(token);
+          const username = decodedToken.sub;
+  
+          // Set the user state with the correct username
+          setUser({ id: 'me', username: username, email: '' }); 
+        } catch (error) {
+          console.error("Invalid token:", error);
+          tokenManager.removeToken(); // Clear the invalid token
+          setUser(null);
         }
-      } catch (error) {
-        console.error("Invalid token:", error);
-        tokenManager.removeToken();
-        setToken(null);
       }
-    }
-    setLoading(false);
-  }, [token]);
+      setIsLoading(false);
+    };
+  
+    initializeAuth();
+  }, []);
 
-  const login = async (credentials: any) => {
-    const response = await authAPI.login(credentials);
-    setToken(response.token);
-    // Directly set user from the API response
-    setUser({ username: response.username }); 
+  const login = async (username: string, password: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      console.log('AuthContext: Starting login...');
+      const response = await authAPI.login({ username, password });
+      console.log('AuthContext: Login response:', response);
+      // Set user from response or create fallback user object
+      const user = response.user || { id: 'me', username, email: '' };
+      setUser(user);
+      console.log('AuthContext: User set:', user);
+    } catch (error) {
+      console.error('AuthContext: Login error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const register = async (userData: any) => {
-    const response = await authAPI.register(userData);
-    setToken(response.token);
-    // Directly set user from the API response
-    setUser({ username: response.username });
+  const register = async (username: string, email: string, password: string): Promise<void> => {
+    try {
+      setIsLoading(true);
+      console.log('AuthContext: Starting registration...');
+      const response = await authAPI.register({ username, email, password });
+      console.log('AuthContext: Registration response:', response);
+      // Set user from response or create fallback user object
+      const user = response.user || { id: 'me', username, email };
+      setUser(user);
+      console.log('AuthContext: User set:', user);
+    } catch (error) {
+      console.error('AuthContext: Registration error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
     authAPI.logout();
     setUser(null);
-    setToken(null);
   };
 
-  const isAuthenticated = !!token;
+  const value: AuthContextType = {
+    user,
+    isAuthenticated: !!user || tokenManager.isAuthenticated(),
+    isLoading,
+    login,
+    register,
+    logout,
+  };
 
-  if (loading) {
-    return <div>Loading application...</div>;
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isAuthenticated }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
